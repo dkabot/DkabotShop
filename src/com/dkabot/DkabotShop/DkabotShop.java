@@ -30,6 +30,7 @@ public class DkabotShop extends JavaPlugin {
 	private Sellers Sell;
 	private Buyers Buy;
 	private History Hist;
+	private ShopInfo Info;
 	public ItemDb itemDB = null;
 	public static Vault vault = null;
 	public Economy economy = null;
@@ -75,12 +76,14 @@ public class DkabotShop extends JavaPlugin {
 		Sell = new Sellers(this);
 		Buy = new Buyers(this);
 		Hist = new History(this);
+		Info = new ShopInfo(this);
 		getCommand("buy").setExecutor(Buy);
 		getCommand("stock").setExecutor(Buy);
 		getCommand("sell").setExecutor(Sell);
 		getCommand("cancel").setExecutor(Sell);
 		getCommand("price").setExecutor(Sell);
 		getCommand("sales").setExecutor(Hist);
+		getCommand("shopinfo").setExecutor(Info);
 		
 		//Plugin Metrics
 		try {

@@ -1,6 +1,6 @@
 name: DkabotShop
 main: com.dkabot.DkabotShop.DkabotShop
-version: 1.72
+version: 1.8
 author: dkabot
 depend: [Vault]
 database: true
@@ -24,8 +24,12 @@ commands:
     usage: /<command> [player] [item] [page] - Look at [page number [page] of] [[player]'s] items [or [item]] for sale.
     aliases: [find]
   sales:
-    description: Get a history of items sold
+    description: Get a history of items sold.
     usage: /<command> [item] [page] - Get [page number [page] of] sales history [of [item]].
+  shopinfo:
+    description: Shows information about the plugin and usage.
+    usage: /<command> [topic] - Look at info for [topic]
+    aliases: [shop]
 
 permissions:
   dkabotshop.*:
@@ -37,6 +41,7 @@ permissions:
       dkabotshop.cancel: true
       dkabotshop.price: true
       dkabotshop.sales: true
+      dkabotshop.shopinfo: true
   dkabotshopadmin.*:
     description: Gives access to all DkabotShop admin features
     children:
@@ -70,4 +75,7 @@ permissions:
     default: true
   dkabotshop.sales:
     description: Allows access to /sales
+    default: true
+  dkabotshop.shopinfo:
+    description: Allows access to /shopinfo
     default: true
