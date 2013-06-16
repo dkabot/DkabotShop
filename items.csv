@@ -1,4 +1,4 @@
-#version: 1.72
+#version: 1.8
 #If you wish to modify this file, note that it will be overwritten on the next update. Change the version to -1 to prevent any overwriting.
 #item,id,metadata
 stone,1,0
