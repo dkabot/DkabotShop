@@ -23,11 +23,10 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.mcstats.Metrics;
 
-
 public class DkabotShop extends JavaPlugin {
 
     public static DkabotShop plugin;
-    Logger log = Logger.getLogger("Minecraft");
+    private static Logger log;
     private Sellers Sell;
     private Buyers Buy;
     private History Hist;
@@ -38,42 +37,24 @@ public class DkabotShop extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        //Vault dependency checker
-        Plugin x = this.getServer().getPluginManager().getPlugin("Vault");
-        if (x != null & x instanceof Vault) {
-            vault = (Vault) x;
-            log.info(String.format("[%s] Hooked %s %s", getDescription().getName(), vault.getDescription().getName(), vault.getDescription().getVersion()));
-        } else {
-            log.severe(String.format("Vault dependency not found! Disabling..."));
-            getPluginLoader().disablePlugin(this);
-            return;
-        }
+        log = this.getLogger();
+        
+        hookDependencies();
         if (!setupEconomy()) {
             log.severe("No economy system found. You need one to use this!");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
+        
         //Sets up ItemDb
         itemDB = new ItemDb(this);
         itemDB.onReload();
-        //Default configuration in case values are missing
-        defaultConfig();
-        //Configuration Validator
-        List<String> result = validateConfig();
-        if (result == null) {
-            getServer().getPluginManager().disablePlugin(this);
-        }
-        if (!result.isEmpty()) {
-            log.severe("[DkabotShop] Error(s) in configuration!");
-            for (int i = 0; i < result.size();) {
-                String error = result.get(i).split(",")[0];
-                String area = result.get(i).split(",")[1];
-                log.severe("[DkabotShop] Error on " + error + " in the " + area + " section!");
-                i++;
-            }
-            log.severe("[DkabotShop] Disabling due to above errors...");
-            getServer().getPluginManager().disablePlugin(this);
-        }
+        
+        checkConfig();
+        
+        validateConfig();
+        
+        
         //The rest of onEnable()
         setupDatabase();
         Sell = new Sellers(this);
@@ -93,7 +74,7 @@ public class DkabotShop extends JavaPlugin {
             Metrics metrics = new Metrics(this);
             metrics.start();
         } catch (IOException ex) {
-            log.warning("[DkabotShop] Failed to start plugin metrics :(");
+            log.warning("Failed to start plugin metrics :(");
         }
 
         log.info(getDescription().getName() + " version " + getDescription().getVersion() + " is now enabled,");
@@ -159,7 +140,7 @@ public class DkabotShop extends JavaPlugin {
     }
 
     ItemStack getMaterial(String itemString, boolean allowHand, Player player, boolean useAlias) {
-        Material material = null;
+        Material material;
         String materialString = itemString.split(":")[0];
         Short dataValue = null;
         if (itemString.split(":").length > 1) {
@@ -278,8 +259,12 @@ public class DkabotShop extends JavaPlugin {
         return price;
     }
 
-    //sets the default config
-    private void defaultConfig() {
+    /**
+     * Ensures the configuration is not missing any needed fields.
+     * 
+     * If no config exists, will create a new one.
+     */
+    private void checkConfig() {
         //Create and set string lists
         List<String> blacklistAlways = new ArrayList<String>();
         List<String> itemAlias = new ArrayList<String>();
@@ -309,38 +294,51 @@ public class DkabotShop extends JavaPlugin {
     }
 
     //Validates the config, as the function name suggests
-    private List<String> validateConfig() {
+    private void validateConfig() {
+        List<String> errors = new ArrayList<>();
         try {
-            List<String> itemsWrong = new ArrayList<String>();
             for (String str : getConfig().getStringList("ItemAlias")) {
                 if (str.split(",").length != 2) {
-                    itemsWrong.add("formatting,ItemAlias");
+                    errors.add("formatting,ItemAlias");
                     continue;
                 }
                 String materialString = str.split(",")[1];
                 if (!materialString.equalsIgnoreCase("hand") && getMaterial(materialString, false, null, false) == null) {
-                    itemsWrong.add(materialString + ",ItemAlias");
+                    errors.add(materialString + ",ItemAlias");
                 }
             }
             for (String materialString : getConfig().getStringList("Blacklist.Always")) {
                 if (getMaterial(materialString, false, null, false) == null) {
-                    itemsWrong.add(materialString + ",Blacklist Always");
+                    errors.add(materialString + ",Blacklist Always");
                 }
             }
             if (getConfig().getDouble("MaxPrice") <= 0 && getConfig().getDouble("MaxPrice") != -1) {
-                itemsWrong.add(getConfig().getDouble("MaxPrice") + ",Maximum Price");
+                errors.add(getConfig().getDouble("MaxPrice") + ",Maximum Price");
             }
             if (getConfig().getDouble("MinPrice") <= 0 && getConfig().getDouble("MinPrice") != -1) {
-                itemsWrong.add(getConfig().getDouble("MinPrice") + ",Minimum Price");
+                errors.add(getConfig().getDouble("MinPrice") + ",Minimum Price");
             }
             if (getConfig().getInt("MaxStock") <= 0 && getConfig().getInt("MaxStock") != -1) {
-                itemsWrong.add(getConfig().getInt("MaxStock") + ",Max Stock");
+                errors.add(getConfig().getInt("MaxStock") + ",Max Stock");
             }
-            return itemsWrong;
         } catch (Exception e) {
             log.severe("[DkabotShop] Exception occurred while processing the configuration! Printing stacktrace and disabling...");
             e.printStackTrace();
-            return null;
+            errors = null;
+        }
+        
+        if (errors == null) {
+            getServer().getPluginManager().disablePlugin(this);
+        }
+        
+        if (!errors.isEmpty()) {
+            log.severe("Error(s) in configuration!");
+            for (String s : errors) {
+                String[] split = s.split(",");
+                log.severe("Error on " + split[0] + " in the " + split[1] + " section!");
+            }
+            log.severe("Disabling due to above errors...");
+            getServer().getPluginManager().disablePlugin(this);
         }
     }
 
@@ -464,5 +462,24 @@ public class DkabotShop extends JavaPlugin {
             }
         }
         return amt >= amount;
+    }
+
+    /**
+     * Hooks into all dependent plugins.
+     * @return true if all hooks were successful, false if any were not found
+     */
+    private boolean hookDependencies() {
+        //Vault dependency checker
+        Plugin vaultPlugin = this.getServer().getPluginManager().getPlugin("Vault");
+        if (vaultPlugin != null & vaultPlugin instanceof Vault) {
+            vault = (Vault) vaultPlugin;
+            log.info(String.format("[%s] Hooked %s %s", getDescription().getName(), vault.getDescription().getName(), vault.getDescription().getVersion()));
+        } else {
+            log.severe(String.format("Vault dependency not found! Disabling..."));
+            getPluginLoader().disablePlugin(this);
+            return false;
+        }
+        
+        return true;
     }
 }

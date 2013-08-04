@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 
 public class ManagedFile {
@@ -20,6 +21,7 @@ public class ManagedFile {
 
     public ManagedFile(final String filename, final DkabotShop plugin) {
         file = new File(plugin.getDataFolder(), filename);
+        Logger log = plugin.getLogger();
 
         if (file.exists()) {
             try {
@@ -42,7 +44,7 @@ public class ManagedFile {
                 }
                 if (itemVersion != null && itemVersion == -1) {
                     fileOK = true;
-                    plugin.log.info("[DkabotShop] items.csv version set to -1, version check SKIPPED");
+                    log.info("[DkabotShop] items.csv version set to -1, version check SKIPPED");
                 } else {
                     if (itemVersion != null && plugin.isDouble(pluginVersionString)) {
                         pluginVersion = Double.parseDouble(pluginVersionString);
@@ -50,23 +52,24 @@ public class ManagedFile {
                     if (pluginVersion != null) {
                         if (pluginVersion.equals(itemVersion)) {
                             fileOK = true;
-                            plugin.log.info("[DkabotShop] items.csv version matches plugin version OK");
+                            log.info("items.csv version matches plugin version OK");
                         } else if (pluginVersion > itemVersion) {
                             //fileOK is already false
-                            plugin.log.info("[DkabotShop] items.csv version below plugin version UPDATING AND REPLACING");
+                            log.info("items.csv version below plugin version UPDATING AND REPLACING");
                         } else {
                             fileOK = true;
-                            plugin.log.info("[DkabotShop] items.csv version above plugin version. NOT OK BUT NOT REPLACING");
-                            plugin.log.info("[DkabotShop] If you wish to disable overwrite set version to -1");
+                            log.info("items.csv version above plugin version. NOT OK BUT NOT REPLACING");
+                            log.info("If you wish to disable overwrite set version to -1");
                         }
                     }
                 }
-                if (!fileOK) {
-                    plugin.log.info("[DkabotShop] items.csv being rewritten - either updating or the version check failed");
-                }
-                if (!fileOK && !file.delete()) {
+                
+                if (!fileOK) 
+                    log.info("items.csv being rewritten - either updating or the version check failed");
+                
+                if (!fileOK && !file.delete()) 
                     throw new IOException("Could not delete file " + file.toString());
-                }
+                
             } catch (IOException ex) {
                 Bukkit.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
             }
