@@ -34,7 +34,19 @@ public class BuyerCommandExecutor implements CommandExecutor {
         }
         //Code for /buy
         if (cmd.getName().equalsIgnoreCase("buy")) {
-            //Player check
+            return handleBuyCommand(sender, cmd, label, args);
+        }
+
+        //Code for /stock
+        if (cmd.getName().equalsIgnoreCase("stock")) {
+            return handleStockCommand(sender, cmd, label, args);
+        }
+        
+        return false;
+    }
+
+    private boolean handleBuyCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        //Player check
             if (!(sender instanceof Player)) {
                 sender.sendMessage(ChatColor.RED + "Only players can buy items!");
                 return true;
@@ -235,11 +247,10 @@ public class BuyerCommandExecutor implements CommandExecutor {
             sender.sendMessage(ChatColor.GREEN + "Successfully bought " + amount + " " + plugin.getItemDB().rget(material.getTypeId(), material.getDurability()).toUpperCase() + ". Total cost: " + totalCost + " " + currencyName);
             //If you get here, success!
             return true;
-        }
+    }
 
-        //Code for /stock
-        if (cmd.getName().equalsIgnoreCase("stock")) {
-            //Permission Check
+    private boolean handleStockCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        //Permission Check
             if (!sender.hasPermission("dkabotshop.stock")) {
                 sender.sendMessage(ChatColor.RED + "You lack permission to do this.");
                 return true;
@@ -337,8 +348,5 @@ public class BuyerCommandExecutor implements CommandExecutor {
                 sender.sendMessage(ChatColor.GREEN + "There is a next page in this list!");
             }
             return true;
-        }
-        //If you get here, you are the new Chuck Norris!
-        return false;
     }
 }

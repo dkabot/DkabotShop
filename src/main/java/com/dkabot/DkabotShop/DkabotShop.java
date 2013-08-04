@@ -41,18 +41,14 @@ public class DkabotShop extends JavaPlugin {
             return;
         }
 
-        //Sets up ItemDb
         setupItemDB();
-
         checkConfig();
         validateConfig();
         setupDatabase();
         setupCommandExecutors();
         startMetrics();
-
-
-        log.info(getDescription().getName() + " version " + getDescription().getVersion() + " is now enabled,");
         reloadConfig();
+        log.info(getDescription().getName() + " version " + getDescription().getVersion() + " is now enabled,");
     }
 
     @Override

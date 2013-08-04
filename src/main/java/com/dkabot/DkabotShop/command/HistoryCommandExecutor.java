@@ -39,6 +39,7 @@ public class HistoryCommandExecutor implements CommandExecutor {
                 sender.sendMessage(ChatColor.RED + "Too many arguments.");
                 return true;
             }
+            
             //Declare Variables
             Player player = (Player) sender;
             ItemStack material = null;
@@ -49,6 +50,7 @@ public class HistoryCommandExecutor implements CommandExecutor {
             String hyphens = "";
             Query<HistoryEntity> query = plugin.getDatabase().find(HistoryEntity.class).orderBy().desc("id");
             ExpressionList<?> eList = query.where();
+            
             for (String arg : args) {
                 if ((arg.contains("p") || arg.contains("P")) && DkabotUtils.isInt(arg.replaceFirst("(?i)p", ""))) {
                     page = Integer.parseInt(arg.replaceFirst("(?i)p", "")) - 1;
