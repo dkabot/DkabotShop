@@ -1,6 +1,7 @@
 //Code taken and modified from Essentials, as are ItemDb.java and items.csv, though items.csv is not marked as such.
-package com.dkabot.DkabotShop;
+package com.dkabot.DkabotShop.util;
 
+import com.dkabot.DkabotShop.DkabotShop;
 import java.io.*;
 import java.math.BigInteger;
 import java.security.DigestOutputStream;

@@ -1,6 +1,7 @@
 //Code taken and modified from Essentials, as are ManagedFile.java and items.csv, though items.csv is not marked as such.
-package com.dkabot.DkabotShop;
+package com.dkabot.DkabotShop.util;
 
+import com.dkabot.DkabotShop.DkabotShop;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;

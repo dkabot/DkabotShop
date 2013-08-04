@@ -1,4 +1,4 @@
-package com.dkabot.DkabotShop;
+package com.dkabot.DkabotShop.persistence;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -6,7 +6,7 @@ import javax.persistence.Table;
 
 @Entity()
 @Table(name = "History")
-public class DB_History {
+public class HistoryEntity {
 
     @Id
     private Integer id;

@@ -13,8 +13,8 @@ import org.bukkit.inventory.ItemStack;
 import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.PagingList;
 import com.avaje.ebean.Query;
-import com.dkabot.DkabotShop.DB_ForSale;
-import com.dkabot.DkabotShop.DB_History;
+import com.dkabot.DkabotShop.persistence.SaleEntity;
+import com.dkabot.DkabotShop.persistence.HistoryEntity;
 import com.dkabot.DkabotShop.DkabotShop;
 
 public class BuyerCommandExecutor implements CommandExecutor {
@@ -105,17 +105,17 @@ public class BuyerCommandExecutor implements CommandExecutor {
                 }
             }
             //Get all instances of this item for sale, save for the ones sold by the buyer
-            Query<DB_ForSale> query = plugin.getDatabase().find(DB_ForSale.class).orderBy().asc("cost");
+            Query<SaleEntity> query = plugin.getDatabase().find(SaleEntity.class).orderBy().asc("cost");
             ExpressionList<?> eList = query.where().eq("item", itemID.toString() + ":" + durability.toString()).ne("seller", sender.getName());
             //Max price check, if applicable
             if (maxPrice != null) {
                 eList = eList.le("cost", maxPrice);
             }
-            List<DB_ForSale> DBClass = query.findList();
+            List<SaleEntity> DBClass = query.findList();
             //Loop through all the entries
             for (sellers = 0; sellers < DBClass.size();) {
                 //Get the specific entry
-                DB_ForSale tmpDB = DBClass.get(sellers);
+                SaleEntity tmpDB = DBClass.get(sellers);
                 //Previous amount remaining to be bought, for calculations
                 prevAmountRemaining = amountRemaining;
                 //Set amount remaining
@@ -171,7 +171,7 @@ public class BuyerCommandExecutor implements CommandExecutor {
             //Give the player items
             for (Integer i = 0; i <= sellers;) {
                 if (i < sellers) {
-                    DB_ForSale tmpDB = DBClass.get(i);
+                    SaleEntity tmpDB = DBClass.get(i);
                     amountGiven = amountGiven + tmpDB.getAmount();
                     Integer amountNotReturned = plugin.giveItem(new ItemStack(material.getType(), tmpDB.getAmount(), durability), player);
                     if (amountNotReturned != 0) {
@@ -193,7 +193,7 @@ public class BuyerCommandExecutor implements CommandExecutor {
             //Take funds from the player
             plugin.getEconomy().withdrawPlayer(sender.getName(), totalCost);
             for (Integer i = 0; i < sellers;) {
-                DB_ForSale tmpDB = DBClass.get(i);
+                SaleEntity tmpDB = DBClass.get(i);
                 //For any and all sellers sold out, give them money and remove their DB entry
                 plugin.getEconomy().depositPlayer(tmpDB.getSeller(), tmpDB.getAmount() * tmpDB.getCost());
                 Player seller = Bukkit.getServer().getPlayer(tmpDB.getSeller());
@@ -204,7 +204,7 @@ public class BuyerCommandExecutor implements CommandExecutor {
                 i++;
             }
             //Set shop amount for final seller and give them money
-            DB_ForSale finalSellerDB = DBClass.get(sellers);
+            SaleEntity finalSellerDB = DBClass.get(sellers);
             if (finalSellerDB.getAmount() - lastSellerAmount <= 0) {
                 messageType = "ShopBoughtAll";
                 plugin.getDatabase().delete(finalSellerDB);
@@ -219,7 +219,7 @@ public class BuyerCommandExecutor implements CommandExecutor {
             }
             plugin.getDatabase().save(DBClass);
             //Get a new instance of the Transaction Logging table and log the transaction
-            DB_History transactionLog = new DB_History();
+            HistoryEntity transactionLog = new HistoryEntity();
             transactionLog.setAmount(amount);
             transactionLog.setBuyer(sender.getName());
             transactionLog.setItem(itemID.toString() + ":" + durability.toString());
@@ -251,13 +251,13 @@ public class BuyerCommandExecutor implements CommandExecutor {
             //Declare Variables
             Player player = (Player) sender;
             String seller = "";
-            PagingList<DB_ForSale> DBPageList = null;
+            PagingList<SaleEntity> DBPageList = null;
             ItemStack material = null;
-            List<DB_ForSale> DBClass = null;
+            List<SaleEntity> DBClass = null;
             Integer hyphenCount;
             Integer page = 0;
             String hyphens = "";
-            Query<DB_ForSale> query = plugin.getDatabase().find(DB_ForSale.class).orderBy().asc("cost");
+            Query<SaleEntity> query = plugin.getDatabase().find(SaleEntity.class).orderBy().asc("cost");
             ExpressionList<?> eList = query.where();
             for (String arg : args) {
                 if ((arg.contains("p") || arg.contains("P")) && plugin.isInt(arg.replaceFirst("(?i)p", ""))) {
@@ -322,7 +322,7 @@ public class BuyerCommandExecutor implements CommandExecutor {
             }
             sender.sendMessage(ChatColor.RED + hyphens + ChatColor.GRAY + " Page " + ChatColor.RED + (page + 1) + " " + hyphens);
             for (Integer i = 0; i < DBClass.size();) {
-                DB_ForSale DB = DBClass.get(i);
+                SaleEntity DB = DBClass.get(i);
                 String currencyName;
                 if (DB.getCost() == 1) {
                     currencyName = plugin.getEconomy().currencyNameSingular();

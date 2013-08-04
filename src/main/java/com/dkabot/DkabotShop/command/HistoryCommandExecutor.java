@@ -1,4 +1,4 @@
-package com.dkabot.DkabotShop;
+package com.dkabot.DkabotShop.command;
 
 import java.util.List;
 
@@ -12,12 +12,14 @@ import org.bukkit.inventory.ItemStack;
 import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.PagingList;
 import com.avaje.ebean.Query;
+import com.dkabot.DkabotShop.persistence.HistoryEntity;
+import com.dkabot.DkabotShop.DkabotShop;
 
-public class History implements CommandExecutor {
+public class HistoryCommandExecutor implements CommandExecutor {
 
     private DkabotShop plugin;
 
-    public History(DkabotShop plugin) {
+    public HistoryCommandExecutor(DkabotShop plugin) {
         this.plugin = plugin;
     }
 
@@ -40,11 +42,11 @@ public class History implements CommandExecutor {
             Player player = (Player) sender;
             ItemStack material = null;
             Integer page = 0;
-            List<DB_History> DBClass = null;
-            PagingList<DB_History> DBPageList = null;
+            List<HistoryEntity> DBClass = null;
+            PagingList<HistoryEntity> DBPageList = null;
             Integer hyphenCount;
             String hyphens = "";
-            Query<DB_History> query = plugin.getDatabase().find(DB_History.class).orderBy().desc("id");
+            Query<HistoryEntity> query = plugin.getDatabase().find(HistoryEntity.class).orderBy().desc("id");
             ExpressionList<?> eList = query.where();
             for (String arg : args) {
                 if ((arg.contains("p") || arg.contains("P")) && plugin.isInt(arg.replaceFirst("(?i)p", ""))) {
@@ -95,7 +97,7 @@ public class History implements CommandExecutor {
             //send that info!
             sender.sendMessage(ChatColor.RED + hyphens + ChatColor.GRAY + " Page " + ChatColor.RED + (page + 1) + " " + hyphens);
             for (Integer i = 0; i < DBClass.size();) {
-                DB_History DB = DBClass.get(i);
+                HistoryEntity DB = DBClass.get(i);
                 String currencyName = "Error Getting Currency";
                 if (DB.getCost() == 1) {
                     currencyName = plugin.getEconomy().currencyNameSingular();

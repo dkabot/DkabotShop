@@ -1,15 +1,16 @@
-package com.dkabot.DkabotShop;
+package com.dkabot.DkabotShop.command;
 
+import com.dkabot.DkabotShop.DkabotShop;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
-public class ShopInfo implements CommandExecutor {
+public class ShopInfoCommandExecutor implements CommandExecutor {
 
     private DkabotShop plugin;
 
-    public ShopInfo(DkabotShop plug) {
+    public ShopInfoCommandExecutor(DkabotShop plug) {
         plugin = plug;
 
     }

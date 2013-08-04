@@ -1,6 +1,6 @@
 package com.dkabot.DkabotShop.command;
 
-import com.dkabot.DkabotShop.DB_ForSale;
+import com.dkabot.DkabotShop.persistence.SaleEntity;
 import com.dkabot.DkabotShop.DkabotShop;
 import java.util.HashMap;
 
@@ -98,7 +98,7 @@ public class SellerCommandExecutor implements CommandExecutor {
                 return true;
             }
             //Get info from DB
-            DB_ForSale DBClass = plugin.getDatabase().find(DB_ForSale.class).where().eq("seller", sender.getName()).eq("item", itemID.toString() + ":" + durability.toString()).findUnique();
+            SaleEntity DBClass = plugin.getDatabase().find(SaleEntity.class).where().eq("seller", sender.getName()).eq("item", itemID.toString() + ":" + durability.toString()).findUnique();
             //Checking that the player can choose not to manually set a cost or not.
             if (DBClass == null && args.length == 2) {
                 sender.sendMessage(ChatColor.RED + "You do not have this item on the market.");
@@ -174,7 +174,7 @@ public class SellerCommandExecutor implements CommandExecutor {
 
             //Item isn't in shop, add it
             if (DBClass == null) {
-                DBClass = new DB_ForSale();
+                DBClass = new SaleEntity();
                 DBClass.setSeller(sender.getName());
                 DBClass.setItem(itemID.toString() + ":" + durability.toString());
                 DBClass.setAmount(amount);
@@ -238,7 +238,7 @@ public class SellerCommandExecutor implements CommandExecutor {
             itemID = material.getTypeId();
             durability = material.getDurability();
             //Get info from DB
-            DB_ForSale DBClass = plugin.getDatabase().find(DB_ForSale.class).where().eq("seller", sender.getName()).eq("item", itemID.toString() + ":" + durability.toString()).findUnique();
+            SaleEntity DBClass = plugin.getDatabase().find(SaleEntity.class).where().eq("seller", sender.getName()).eq("item", itemID.toString() + ":" + durability.toString()).findUnique();
             //MOAR validity check!
             if (DBClass == null) {
                 sender.sendMessage(ChatColor.RED + "You aren't currently selling this!");
@@ -353,7 +353,7 @@ public class SellerCommandExecutor implements CommandExecutor {
             itemID = material.getTypeId();
             durability = material.getDurability();
             //Get info from DB
-            DB_ForSale DBClass = plugin.getDatabase().find(DB_ForSale.class).where().eq("seller", sender.getName()).eq("item", itemID.toString() + ":" + durability.toString()).findUnique();
+            SaleEntity DBClass = plugin.getDatabase().find(SaleEntity.class).where().eq("seller", sender.getName()).eq("item", itemID.toString() + ":" + durability.toString()).findUnique();
             //Check if they are actually selling the item
             if (DBClass == null) {
                 sender.sendMessage(ChatColor.RED + "You aren't currently selling this!");

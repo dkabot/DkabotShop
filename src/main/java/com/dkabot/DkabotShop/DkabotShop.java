@@ -1,5 +1,10 @@
 package com.dkabot.DkabotShop;
 
+import com.dkabot.DkabotShop.util.ItemDb;
+import com.dkabot.DkabotShop.command.ShopInfoCommandExecutor;
+import com.dkabot.DkabotShop.persistence.SaleEntity;
+import com.dkabot.DkabotShop.persistence.HistoryEntity;
+import com.dkabot.DkabotShop.command.HistoryCommandExecutor;
 import com.dkabot.DkabotShop.command.SellerCommandExecutor;
 import com.dkabot.DkabotShop.command.BuyerCommandExecutor;
 import java.io.IOException;
@@ -33,8 +38,8 @@ public class DkabotShop extends JavaPlugin {
     private static Logger log;
     private SellerCommandExecutor Sell;
     private BuyerCommandExecutor Buy;
-    private History Hist;
-    private ShopInfo Info;
+    private HistoryCommandExecutor Hist;
+    private ShopInfoCommandExecutor Info;
     private ItemDb itemDB = null;
     private static Vault vault = null;
     private Economy economy = null;
@@ -63,8 +68,8 @@ public class DkabotShop extends JavaPlugin {
         setupDatabase();
         Sell = new SellerCommandExecutor(this);
         Buy = new BuyerCommandExecutor(this);
-        Hist = new History(this);
-        Info = new ShopInfo(this);
+        Hist = new HistoryCommandExecutor(this);
+        Info = new ShopInfoCommandExecutor(this);
         getCommand("buy").setExecutor(Buy);
         getCommand("stock").setExecutor(Buy);
         getCommand("sell").setExecutor(Sell);
@@ -110,8 +115,8 @@ public class DkabotShop extends JavaPlugin {
 
     public void setupDatabase() {
         try {
-            getDatabase().find(DB_ForSale.class).findRowCount();
-            getDatabase().find(DB_History.class).findRowCount();
+            getDatabase().find(SaleEntity.class).findRowCount();
+            getDatabase().find(HistoryEntity.class).findRowCount();
         } catch (PersistenceException ex) {
             log.info("Installing database due to first time usage");
             installDDL();
@@ -121,8 +126,8 @@ public class DkabotShop extends JavaPlugin {
     @Override
     public ArrayList<Class<?>> getDatabaseClasses() {
         ArrayList<Class<?>> list = new ArrayList<Class<?>>();
-        list.add(DB_ForSale.class);
-        list.add(DB_History.class);
+        list.add(SaleEntity.class);
+        list.add(HistoryEntity.class);
         return list;
     }
 
