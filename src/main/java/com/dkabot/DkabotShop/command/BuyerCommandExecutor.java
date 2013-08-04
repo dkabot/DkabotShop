@@ -16,7 +16,7 @@ import com.avaje.ebean.Query;
 import com.dkabot.DkabotShop.persistence.SaleEntity;
 import com.dkabot.DkabotShop.persistence.HistoryEntity;
 import com.dkabot.DkabotShop.DkabotShop;
-import com.dkabot.DkabotShop.util.DkbotUtils;
+import com.dkabot.DkabotShop.util.DkabotUtils;
 
 public class BuyerCommandExecutor implements CommandExecutor {
 
@@ -75,7 +75,7 @@ public class BuyerCommandExecutor implements CommandExecutor {
                 return true;
             }
             //Nice try, but still no
-            if (DkbotUtils.illegalItem(material)) {
+            if (DkabotUtils.illegalItem(material)) {
                 sender.sendMessage(ChatColor.RED + "Disallowed item!");
                 return true;
             }
@@ -174,7 +174,7 @@ public class BuyerCommandExecutor implements CommandExecutor {
                 if (i < sellers) {
                     SaleEntity tmpDB = DBClass.get(i);
                     amountGiven = amountGiven + tmpDB.getAmount();
-                    Integer amountNotReturned = DkbotUtils.giveItem(new ItemStack(material.getType(), tmpDB.getAmount(), durability), player);
+                    Integer amountNotReturned = DkabotUtils.giveItem(new ItemStack(material.getType(), tmpDB.getAmount(), durability), player);
                     if (amountNotReturned != 0) {
                         sender.sendMessage(ChatColor.RED + "You lack enough space for this!");
                         player.getInventory().removeItem(new ItemStack(material.getType(), amountGiven - amountNotReturned, durability));
@@ -182,7 +182,7 @@ public class BuyerCommandExecutor implements CommandExecutor {
                     }
                 } else {
                     amountGiven = amountGiven + lastSellerAmount;
-                    Integer amountNotReturned = DkbotUtils.giveItem(new ItemStack(material.getType(), lastSellerAmount, durability), player);
+                    Integer amountNotReturned = DkabotUtils.giveItem(new ItemStack(material.getType(), lastSellerAmount, durability), player);
                     if (amountNotReturned != 0) {
                         sender.sendMessage(ChatColor.RED + "You lack enough space for this!");
                         player.getInventory().removeItem(new ItemStack(material.getType(), amountGiven - amountNotReturned, durability));
@@ -199,7 +199,7 @@ public class BuyerCommandExecutor implements CommandExecutor {
                 plugin.getEconomy().depositPlayer(tmpDB.getSeller(), tmpDB.getAmount() * tmpDB.getCost());
                 Player seller = Bukkit.getServer().getPlayer(tmpDB.getSeller());
                 if (seller != null) {
-                    seller.sendMessage(DkbotUtils.formatMessage("ShopBoughtAll", sender.getName(), plugin.getItemDB().rget(material.getTypeId(), material.getDurability()).toUpperCase(), null, null, null));
+                    seller.sendMessage(DkabotUtils.formatMessage("ShopBoughtAll", sender.getName(), plugin.getItemDB().rget(material.getTypeId(), material.getDurability()).toUpperCase(), null, null, null));
                 }
                 plugin.getDatabase().delete(tmpDB);
                 i++;
@@ -216,7 +216,7 @@ public class BuyerCommandExecutor implements CommandExecutor {
             plugin.getEconomy().depositPlayer(finalSellerDB.getSeller(), lastSellerAmount * finalSellerDB.getCost());
             Player finalSeller = Bukkit.getServer().getPlayer(finalSellerDB.getSeller());
             if (finalSeller != null) {
-                finalSeller.sendMessage(DkbotUtils.formatMessage(messageType, sender.getName(), plugin.getItemDB().rget(material.getTypeId(), material.getDurability()).toUpperCase(), lastSellerAmount, null, null));
+                finalSeller.sendMessage(DkabotUtils.formatMessage(messageType, sender.getName(), plugin.getItemDB().rget(material.getTypeId(), material.getDurability()).toUpperCase(), lastSellerAmount, null, null));
             }
             plugin.getDatabase().save(DBClass);
             //Get a new instance of the Transaction Logging table and log the transaction
@@ -270,7 +270,7 @@ public class BuyerCommandExecutor implements CommandExecutor {
                 }
             }
             if (material != null) {
-                if (DkbotUtils.illegalItem(material)) {
+                if (DkabotUtils.illegalItem(material)) {
                     sender.sendMessage(ChatColor.RED + "Disallowed Item!");
                     return true;
                 }

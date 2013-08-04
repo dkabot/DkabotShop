@@ -14,7 +14,7 @@ import com.avaje.ebean.PagingList;
 import com.avaje.ebean.Query;
 import com.dkabot.DkabotShop.persistence.HistoryEntity;
 import com.dkabot.DkabotShop.DkabotShop;
-import com.dkabot.DkabotShop.util.DkbotUtils;
+import com.dkabot.DkabotShop.util.DkabotUtils;
 
 public class HistoryCommandExecutor implements CommandExecutor {
 
@@ -61,7 +61,7 @@ public class HistoryCommandExecutor implements CommandExecutor {
                 return true;
             }
             if (material != null) {
-                if (DkbotUtils.illegalItem(material)) {
+                if (DkabotUtils.illegalItem(material)) {
                     sender.sendMessage(ChatColor.RED + "Disallowed Item!");
                     return true;
                 }

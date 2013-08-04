@@ -31,7 +31,7 @@ import org.bukkit.inventory.ItemStack;
  *
  * @author Joshua Michael Hertlein <jmhertlein@gmail.com>
  */
-public class DkbotUtils {
+public class DkabotUtils {
     
     //checks if an item is on a blacklist. Boolean for now, but will become something else once a datavalue item blacklist is added
     public static boolean illegalItem(ItemStack material) {

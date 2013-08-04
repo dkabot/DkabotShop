@@ -2,7 +2,7 @@ package com.dkabot.DkabotShop.command;
 
 import com.dkabot.DkabotShop.persistence.SaleEntity;
 import com.dkabot.DkabotShop.DkabotShop;
-import com.dkabot.DkabotShop.util.DkbotUtils;
+import com.dkabot.DkabotShop.util.DkabotUtils;
 import java.util.HashMap;
 
 import org.bukkit.ChatColor;
@@ -67,7 +67,7 @@ public class SellerCommandExecutor implements CommandExecutor {
                 sender.sendMessage(ChatColor.RED + "Invalid Item!");
                 return true;
             }
-            if (DkbotUtils.illegalItem(material)) {
+            if (DkabotUtils.illegalItem(material)) {
                 sender.sendMessage(ChatColor.RED + "Disallowed Item!");
                 return true;
             }
@@ -75,7 +75,7 @@ public class SellerCommandExecutor implements CommandExecutor {
             itemID = material.getTypeId();
             durability = material.getDurability();
             //More logic here, to allow for a case of "all" argument
-            instancesOfItem = DkbotUtils.all(player.getInventory(), material);
+            instancesOfItem = DkabotUtils.all(player.getInventory(), material);
             if (args[1].equalsIgnoreCase("all")) {
                 if (instancesOfItem.isEmpty()) {
                     sender.sendMessage(ChatColor.RED + "You must have the item you wish to sell");
@@ -93,7 +93,7 @@ public class SellerCommandExecutor implements CommandExecutor {
                 sender.sendMessage(ChatColor.RED + "You can't sell none or negative of an item!");
                 return true;
             }
-            if (!DkbotUtils.contains(player.getInventory(), material, amount)) {
+            if (!DkabotUtils.contains(player.getInventory(), material, amount)) {
                 sender.sendMessage(ChatColor.RED + "You must have the item you wish to sell");
                 sender.sendMessage(ChatColor.RED + "in your inventory!");
                 return true;
@@ -181,18 +181,18 @@ public class SellerCommandExecutor implements CommandExecutor {
                 DBClass.setAmount(amount);
                 DBClass.setCost(cost);
                 plugin.getDatabase().save(DBClass);
-                DkbotUtils.broadcastMessage(DkbotUtils.formatMessage("NewlySelling", sender.getName(), plugin.getItemDB().rget(material.getTypeId(), material.getDurability()).toUpperCase(), amount, cost, currencyName));
+                DkabotUtils.broadcastMessage(DkabotUtils.formatMessage("NewlySelling", sender.getName(), plugin.getItemDB().rget(material.getTypeId(), material.getDurability()).toUpperCase(), amount, cost, currencyName));
             } //Item is in shop, modify the entry
             else {
                 //Set amount in the DB
                 DBClass.setAmount(DBClass.getAmount() + amount);
                 //Cost not changed, just broadcast
                 if (cost == null) {
-                    DkbotUtils.broadcastMessage(DkbotUtils.formatMessage("Added", sender.getName(), plugin.getItemDB().rget(material.getTypeId(), material.getDurability()).toUpperCase(), amount, null, null));
+                    DkabotUtils.broadcastMessage(DkabotUtils.formatMessage("Added", sender.getName(), plugin.getItemDB().rget(material.getTypeId(), material.getDurability()).toUpperCase(), amount, null, null));
                 } else {
                     //Cost changed, set cost and broadcast varied message.
                     DBClass.setCost(cost);
-                    DkbotUtils.broadcastMessage(DkbotUtils.formatMessage("AddedPriceChange", sender.getName(), plugin.getItemDB().rget(material.getTypeId(), material.getDurability()).toUpperCase(), amount, cost, currencyName));
+                    DkabotUtils.broadcastMessage(DkabotUtils.formatMessage("AddedPriceChange", sender.getName(), plugin.getItemDB().rget(material.getTypeId(), material.getDurability()).toUpperCase(), amount, cost, currencyName));
                 }
                 //Save new info to the DB
                 plugin.getDatabase().save(DBClass);
@@ -231,7 +231,7 @@ public class SellerCommandExecutor implements CommandExecutor {
                 sender.sendMessage(ChatColor.RED + "Invalid Item!");
                 return true;
             }
-            if (DkbotUtils.illegalItem(material)) {
+            if (DkabotUtils.illegalItem(material)) {
                 sender.sendMessage(ChatColor.RED + "Disallowed Item!");
                 return true;
             }
@@ -297,18 +297,18 @@ public class SellerCommandExecutor implements CommandExecutor {
                 //Inform the player of their lack of space
                 sender.sendMessage(ChatColor.GREEN + "You can only hold " + amountReturned + " of this, so you got that much back.");
                 //Tell the whole server what just happened
-                DkbotUtils.broadcastMessage(DkbotUtils.formatMessage("RemovedSome", sender.getName(), plugin.getItemDB().rget(material.getTypeId(), material.getDurability()).toUpperCase(), amountNotReturned, null, null));
+                DkabotUtils.broadcastMessage(DkabotUtils.formatMessage("RemovedSome", sender.getName(), plugin.getItemDB().rget(material.getTypeId(), material.getDurability()).toUpperCase(), amountNotReturned, null, null));
 
             } else {
                 if (args.length == 2 && amountNotReturned != 0) {
                     //Again, in case of /cancel item amount. Saves amount in DB and tells the server what happened.
                     DBClass.setAmount(amountNotReturned);
                     plugin.getDatabase().save(DBClass);
-                    DkbotUtils.broadcastMessage(DkbotUtils.formatMessage("RemovedSome", sender.getName(), plugin.getItemDB().rget(material.getTypeId(), material.getDurability()).toUpperCase(), amountNotReturned, null, null));
+                    DkabotUtils.broadcastMessage(DkabotUtils.formatMessage("RemovedSome", sender.getName(), plugin.getItemDB().rget(material.getTypeId(), material.getDurability()).toUpperCase(), amountNotReturned, null, null));
                 } else {
                     //In case the supply was emptied, tell the whole server and delete the DB entry.
                     //If /cancel item amount depletes the supply, this is called instead.
-                    DkbotUtils.broadcastMessage(DkbotUtils.formatMessage("RemovedAll", sender.getName(), plugin.getItemDB().rget(material.getTypeId(), material.getDurability()).toUpperCase(), null, null, null));
+                    DkabotUtils.broadcastMessage(DkabotUtils.formatMessage("RemovedAll", sender.getName(), plugin.getItemDB().rget(material.getTypeId(), material.getDurability()).toUpperCase(), null, null, null));
                     plugin.getDatabase().delete(DBClass);
                 }
             }
@@ -346,7 +346,7 @@ public class SellerCommandExecutor implements CommandExecutor {
                 sender.sendMessage(ChatColor.RED + "Invalid Item!");
                 return true;
             }
-            if (DkbotUtils.illegalItem(material)) {
+            if (DkabotUtils.illegalItem(material)) {
                 sender.sendMessage(ChatColor.RED + "Disallowed Item!");
                 return true;
             }
@@ -375,7 +375,7 @@ public class SellerCommandExecutor implements CommandExecutor {
                 currencyName = plugin.getEconomy().currencyNamePlural();
             }
             //Tell the whole server what just happened
-            DkbotUtils.broadcastMessage(DkbotUtils.formatMessage("PriceChange", sender.getName(), plugin.getItemDB().rget(material.getTypeId(), material.getDurability()).toUpperCase(), null, cost, currencyName));
+            DkabotUtils.broadcastMessage(DkabotUtils.formatMessage("PriceChange", sender.getName(), plugin.getItemDB().rget(material.getTypeId(), material.getDurability()).toUpperCase(), null, cost, currencyName));
             //If you reach here, success!
             return true;
         }
