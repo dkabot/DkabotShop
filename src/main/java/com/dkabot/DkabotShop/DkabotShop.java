@@ -26,10 +26,6 @@ public class DkabotShop extends JavaPlugin {
 
     private static DkabotShop instance;
     private static Logger log;
-    private SellerCommandExecutor Sell;
-    private BuyerCommandExecutor Buy;
-    private HistoryCommandExecutor Hist;
-    private ShopInfoCommandExecutor Info;
     private ItemDb itemDB = null;
     private static Vault vault = null;
     private Economy economy = null;
@@ -37,44 +33,23 @@ public class DkabotShop extends JavaPlugin {
     @Override
     public void onEnable() {
         log = this.getLogger();
-        
+
         hookDependencies();
         if (!setupEconomy()) {
             log.severe("No economy system found. You need one to use this!");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
-        
-        //Sets up ItemDb
-        itemDB = new ItemDb(this);
-        itemDB.onReload();
-        
-        checkConfig();
-        
-        validateConfig();
-        
-        
-        //The rest of onEnable()
-        setupDatabase();
-        Sell = new SellerCommandExecutor(this);
-        Buy = new BuyerCommandExecutor(this);
-        Hist = new HistoryCommandExecutor(this);
-        Info = new ShopInfoCommandExecutor(this);
-        getCommand("buy").setExecutor(Buy);
-        getCommand("stock").setExecutor(Buy);
-        getCommand("sell").setExecutor(Sell);
-        getCommand("cancel").setExecutor(Sell);
-        getCommand("price").setExecutor(Sell);
-        getCommand("sales").setExecutor(Hist);
-        getCommand("shopinfo").setExecutor(Info);
 
-        //Plugin Metrics
-        try {
-            Metrics metrics = new Metrics(this);
-            metrics.start();
-        } catch (IOException ex) {
-            log.warning("Failed to start plugin metrics.");
-        }
+        //Sets up ItemDb
+        setupItemDB();
+
+        checkConfig();
+        validateConfig();
+        setupDatabase();
+        setupCommandExecutors();
+        startMetrics();
+
 
         log.info(getDescription().getName() + " version " + getDescription().getVersion() + " is now enabled,");
         reloadConfig();
@@ -84,9 +59,6 @@ public class DkabotShop extends JavaPlugin {
     public void onDisable() {
         log.info(getDescription().getName() + " is now disabled.");
     }
-
-
-    
 
     public void setupDatabase() {
         try {
@@ -100,12 +72,11 @@ public class DkabotShop extends JavaPlugin {
 
     @Override
     public ArrayList<Class<?>> getDatabaseClasses() {
-        ArrayList<Class<?>> list = new ArrayList<Class<?>>();
+        ArrayList<Class<?>> list = new ArrayList<>();
         list.add(SaleEntity.class);
         list.add(HistoryEntity.class);
         return list;
     }
-
 
     private Boolean setupEconomy() {
         RegisteredServiceProvider<Economy> economyProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class);
@@ -115,17 +86,15 @@ public class DkabotShop extends JavaPlugin {
         return (economy != null);
     }
 
-
-
     /**
      * Ensures the configuration is not missing any needed fields.
-     * 
+     *
      * If no config exists, will create a new one.
      */
     private void checkConfig() {
         //Create and set string lists
-        List<String> blacklistAlways = new ArrayList<String>();
-        List<String> itemAlias = new ArrayList<String>();
+        List<String> blacklistAlways = new ArrayList<>();
+        List<String> itemAlias = new ArrayList<>();
         blacklistAlways.add("137");
         itemAlias.add("wood,17:0");
         //Add default config and save
@@ -184,11 +153,11 @@ public class DkabotShop extends JavaPlugin {
             e.printStackTrace();
             errors = null;
         }
-        
+
         if (errors == null) {
             getServer().getPluginManager().disablePlugin(this);
         }
-        
+
         if (!errors.isEmpty()) {
             log.severe("Error(s) in configuration!");
             for (String s : errors) {
@@ -200,9 +169,9 @@ public class DkabotShop extends JavaPlugin {
         }
     }
 
-
     /**
      * Hooks into all dependent plugins.
+     *
      * @return true if all hooks were successful, false if any were not found
      */
     private boolean hookDependencies() {
@@ -216,7 +185,7 @@ public class DkabotShop extends JavaPlugin {
             getPluginLoader().disablePlugin(this);
             return false;
         }
-        
+
         return true;
     }
 
@@ -230,5 +199,33 @@ public class DkabotShop extends JavaPlugin {
 
     public Economy getEconomy() {
         return economy;
+    }
+
+    private void setupCommandExecutors() {
+        SellerCommandExecutor sellExecutor = new SellerCommandExecutor(this);
+        BuyerCommandExecutor buyExecutor = new BuyerCommandExecutor(this);
+        HistoryCommandExecutor histExecutor = new HistoryCommandExecutor(this);
+        ShopInfoCommandExecutor infoExecutor = new ShopInfoCommandExecutor(this);
+        getCommand("buy").setExecutor(buyExecutor);
+        getCommand("stock").setExecutor(buyExecutor);
+        getCommand("sell").setExecutor(sellExecutor);
+        getCommand("cancel").setExecutor(sellExecutor);
+        getCommand("price").setExecutor(sellExecutor);
+        getCommand("sales").setExecutor(histExecutor);
+        getCommand("shopinfo").setExecutor(infoExecutor);
+    }
+
+    private void startMetrics() {
+        try {
+            Metrics metrics = new Metrics(this);
+            metrics.start();
+        } catch (IOException ex) {
+            log.warning("Failed to start plugin metrics.");
+        }
+    }
+
+    private void setupItemDB() {
+        itemDB = new ItemDb(this);
+        itemDB.onReload();
     }
 }
