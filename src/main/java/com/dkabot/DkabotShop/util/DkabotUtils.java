@@ -244,7 +244,7 @@ public class DkabotUtils {
         return new ItemStack(material, 1, dataValue);
     }
 
-    public static Double getMoney(String s) {
+    public static Double parseMoneyAmount(String s) {
         try {
             Double d = Double.parseDouble(s);
             DecimalFormat twoDForm = new DecimalFormat("#.00");
@@ -255,7 +255,7 @@ public class DkabotUtils {
     }
 
     public static Double getMoneyPlayer(String s, Player player) {
-        Double price = getMoney(s);
+        Double price = parseMoneyAmount(s);
         if (price == null) {
             player.sendMessage(ChatColor.RED + "Invalid cost amount!");
             return null;
