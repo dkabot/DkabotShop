@@ -1,4 +1,4 @@
-package com.dkabot.DkabotShop;
+package com.dkabot.DkabotShop.command;
 
 import java.util.List;
 
@@ -13,12 +13,15 @@ import org.bukkit.inventory.ItemStack;
 import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.PagingList;
 import com.avaje.ebean.Query;
+import com.dkabot.DkabotShop.DB_ForSale;
+import com.dkabot.DkabotShop.DB_History;
+import com.dkabot.DkabotShop.DkabotShop;
 
-public class Buyers implements CommandExecutor {
+public class BuyerCommandExecutor implements CommandExecutor {
 
     private DkabotShop plugin;
 
-    public Buyers(DkabotShop plugin) {
+    public BuyerCommandExecutor(DkabotShop plugin) {
         this.plugin = plugin;
     }
 
@@ -154,12 +157,12 @@ public class Buyers implements CommandExecutor {
                 }
             }
             //Check if the buyer has enough funds
-            if (plugin.economy.getBalance(sender.getName()) < totalCost) {
-                Double amountNeeded = totalCost - plugin.economy.getBalance(sender.getName());
+            if (plugin.getEconomy().getBalance(sender.getName()) < totalCost) {
+                Double amountNeeded = totalCost - plugin.getEconomy().getBalance(sender.getName());
                 if (amountNeeded == 1) {
-                    currencyName = plugin.economy.currencyNameSingular();
+                    currencyName = plugin.getEconomy().currencyNameSingular();
                 } else {
-                    currencyName = plugin.economy.currencyNamePlural();
+                    currencyName = plugin.getEconomy().currencyNamePlural();
                 }
                 sender.sendMessage(ChatColor.RED + "You lack enough funds, you need " + ChatColor.YELLOW + amountNeeded + ChatColor.RED + " more " + currencyName + "!");
                 return true;
@@ -188,14 +191,14 @@ public class Buyers implements CommandExecutor {
                 i++;
             }
             //Take funds from the player
-            plugin.economy.withdrawPlayer(sender.getName(), totalCost);
+            plugin.getEconomy().withdrawPlayer(sender.getName(), totalCost);
             for (Integer i = 0; i < sellers;) {
                 DB_ForSale tmpDB = DBClass.get(i);
                 //For any and all sellers sold out, give them money and remove their DB entry
-                plugin.economy.depositPlayer(tmpDB.getSeller(), tmpDB.getAmount() * tmpDB.getCost());
+                plugin.getEconomy().depositPlayer(tmpDB.getSeller(), tmpDB.getAmount() * tmpDB.getCost());
                 Player seller = Bukkit.getServer().getPlayer(tmpDB.getSeller());
                 if (seller != null) {
-                    seller.sendMessage(plugin.formatMessage("ShopBoughtAll", sender.getName(), plugin.itemDB.rget(material.getTypeId(), material.getDurability()).toUpperCase(), null, null, null));
+                    seller.sendMessage(plugin.formatMessage("ShopBoughtAll", sender.getName(), plugin.getItemDB().rget(material.getTypeId(), material.getDurability()).toUpperCase(), null, null, null));
                 }
                 plugin.getDatabase().delete(tmpDB);
                 i++;
@@ -209,10 +212,10 @@ public class Buyers implements CommandExecutor {
                 messageType = "ShopBoughtSome";
                 finalSellerDB.setAmount(finalSellerDB.getAmount() - lastSellerAmount);
             }
-            plugin.economy.depositPlayer(finalSellerDB.getSeller(), lastSellerAmount * finalSellerDB.getCost());
+            plugin.getEconomy().depositPlayer(finalSellerDB.getSeller(), lastSellerAmount * finalSellerDB.getCost());
             Player finalSeller = Bukkit.getServer().getPlayer(finalSellerDB.getSeller());
             if (finalSeller != null) {
-                finalSeller.sendMessage(plugin.formatMessage(messageType, sender.getName(), plugin.itemDB.rget(material.getTypeId(), material.getDurability()).toUpperCase(), lastSellerAmount, null, null));
+                finalSeller.sendMessage(plugin.formatMessage(messageType, sender.getName(), plugin.getItemDB().rget(material.getTypeId(), material.getDurability()).toUpperCase(), lastSellerAmount, null, null));
             }
             plugin.getDatabase().save(DBClass);
             //Get a new instance of the Transaction Logging table and log the transaction
@@ -224,11 +227,11 @@ public class Buyers implements CommandExecutor {
             transactionLog.setCost(totalCost / amount);
             plugin.getDatabase().save(transactionLog);
             if (totalCost == 1) {
-                currencyName = plugin.economy.currencyNameSingular();
+                currencyName = plugin.getEconomy().currencyNameSingular();
             } else {
-                currencyName = plugin.economy.currencyNamePlural();
+                currencyName = plugin.getEconomy().currencyNamePlural();
             }
-            sender.sendMessage(ChatColor.GREEN + "Successfully bought " + amount + " " + plugin.itemDB.rget(material.getTypeId(), material.getDurability()).toUpperCase() + ". Total cost: " + totalCost + " " + currencyName);
+            sender.sendMessage(ChatColor.GREEN + "Successfully bought " + amount + " " + plugin.getItemDB().rget(material.getTypeId(), material.getDurability()).toUpperCase() + ". Total cost: " + totalCost + " " + currencyName);
             //If you get here, success!
             return true;
         }
@@ -291,9 +294,9 @@ public class Buyers implements CommandExecutor {
                 if (page > 0) {
                     message = "Page " + (page + 1) + " contains no results. Try page 1";
                 } else if (material != null && seller != "") {
-                    message = seller + " is not selling any " + plugin.itemDB.rget(material.getTypeId(), material.getDurability()).toUpperCase();
+                    message = seller + " is not selling any " + plugin.getItemDB().rget(material.getTypeId(), material.getDurability()).toUpperCase();
                 } else if (material != null) {
-                    message = "Nobody is selling any " + plugin.itemDB.rget(material.getTypeId(), material.getDurability()).toUpperCase();
+                    message = "Nobody is selling any " + plugin.getItemDB().rget(material.getTypeId(), material.getDurability()).toUpperCase();
                 } else if (seller != "") {
                     message = seller + " is not selling anything";
                 } else {
@@ -309,11 +312,11 @@ public class Buyers implements CommandExecutor {
                 i++;
             }
             if (seller != "" && material != null) {
-                sender.sendMessage(ChatColor.GREEN + "Items For Sale, " + plugin.itemDB.rget(material.getTypeId(), material.getDurability()).toUpperCase() + " Sold By " + seller + " Only:");
+                sender.sendMessage(ChatColor.GREEN + "Items For Sale, " + plugin.getItemDB().rget(material.getTypeId(), material.getDurability()).toUpperCase() + " Sold By " + seller + " Only:");
             } else if (seller != "") {
                 sender.sendMessage(ChatColor.GREEN + "Items For Sale, " + seller + " Only:");
             } else if (material != null) {
-                sender.sendMessage(ChatColor.GREEN + "Items For Sale, " + plugin.itemDB.rget(material.getTypeId(), material.getDurability()).toUpperCase() + " Only:");
+                sender.sendMessage(ChatColor.GREEN + "Items For Sale, " + plugin.getItemDB().rget(material.getTypeId(), material.getDurability()).toUpperCase() + " Only:");
             } else {
                 sender.sendMessage(ChatColor.GREEN + "Items For Sale, No Filter:");
             }
@@ -322,11 +325,11 @@ public class Buyers implements CommandExecutor {
                 DB_ForSale DB = DBClass.get(i);
                 String currencyName;
                 if (DB.getCost() == 1) {
-                    currencyName = plugin.economy.currencyNameSingular();
+                    currencyName = plugin.getEconomy().currencyNameSingular();
                 } else {
-                    currencyName = plugin.economy.currencyNamePlural();
+                    currencyName = plugin.getEconomy().currencyNamePlural();
                 }
-                sender.sendMessage(ChatColor.GOLD + DB.getSeller() + ChatColor.BLUE + ": " + ChatColor.GOLD + DB.getAmount() + " " + plugin.itemDB.rget(DB.getItem()).toUpperCase() + ChatColor.BLUE + " for " + ChatColor.GOLD + DB.getCost() + " " + currencyName + ChatColor.BLUE + " each.");
+                sender.sendMessage(ChatColor.GOLD + DB.getSeller() + ChatColor.BLUE + ": " + ChatColor.GOLD + DB.getAmount() + " " + plugin.getItemDB().rget(DB.getItem()).toUpperCase() + ChatColor.BLUE + " for " + ChatColor.GOLD + DB.getCost() + " " + currencyName + ChatColor.BLUE + " each.");
                 i++;
             }
             if (DBPageList.getPage(page).hasNext()) {

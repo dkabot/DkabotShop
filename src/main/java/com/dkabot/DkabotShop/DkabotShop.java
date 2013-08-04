@@ -1,5 +1,7 @@
 package com.dkabot.DkabotShop;
 
+import com.dkabot.DkabotShop.command.SellerCommandExecutor;
+import com.dkabot.DkabotShop.command.BuyerCommandExecutor;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -12,9 +14,11 @@ import javax.persistence.PersistenceException;
 
 import net.milkbowl.vault.Vault;
 import net.milkbowl.vault.economy.Economy;
+import org.bukkit.Bukkit;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -25,15 +29,15 @@ import org.mcstats.Metrics;
 
 public class DkabotShop extends JavaPlugin {
 
-    public static DkabotShop plugin;
+    private static DkabotShop instance;
     private static Logger log;
-    private Sellers Sell;
-    private Buyers Buy;
+    private SellerCommandExecutor Sell;
+    private BuyerCommandExecutor Buy;
     private History Hist;
     private ShopInfo Info;
-    public ItemDb itemDB = null;
-    public static Vault vault = null;
-    public Economy economy = null;
+    private ItemDb itemDB = null;
+    private static Vault vault = null;
+    private Economy economy = null;
 
     @Override
     public void onEnable() {
@@ -57,8 +61,8 @@ public class DkabotShop extends JavaPlugin {
         
         //The rest of onEnable()
         setupDatabase();
-        Sell = new Sellers(this);
-        Buy = new Buyers(this);
+        Sell = new SellerCommandExecutor(this);
+        Buy = new BuyerCommandExecutor(this);
         Hist = new History(this);
         Info = new ShopInfo(this);
         getCommand("buy").setExecutor(Buy);
@@ -74,7 +78,7 @@ public class DkabotShop extends JavaPlugin {
             Metrics metrics = new Metrics(this);
             metrics.start();
         } catch (IOException ex) {
-            log.warning("Failed to start plugin metrics :(");
+            log.warning("Failed to start plugin metrics.");
         }
 
         log.info(getDescription().getName() + " version " + getDescription().getVersion() + " is now enabled,");
@@ -86,7 +90,7 @@ public class DkabotShop extends JavaPlugin {
         log.info(getDescription().getName() + " is now disabled.");
     }
 
-    boolean isInt(String s) {
+    public static boolean isInt(String s) {
         try {
             Integer.parseInt(s);
             return true;
@@ -95,7 +99,7 @@ public class DkabotShop extends JavaPlugin {
         }
     }
 
-    boolean isDouble(String s) {
+    public static boolean isDouble(String s) {
         try {
             Double.parseDouble(s);
             return true;
@@ -122,7 +126,7 @@ public class DkabotShop extends JavaPlugin {
         return list;
     }
 
-    boolean isDecimal(double v) {
+    public static boolean isDecimal(double v) {
         return (Math.floor(v) != v);
         //If true, decimal, else whole number.
     }
@@ -135,11 +139,11 @@ public class DkabotShop extends JavaPlugin {
         return (economy != null);
     }
 
-    ItemStack getMaterial(String itemString, boolean allowHand, Player player) {
+    public static ItemStack getMaterial(String itemString, boolean allowHand, Player player) {
         return getMaterial(itemString, allowHand, player, true);
     }
 
-    ItemStack getMaterial(String itemString, boolean allowHand, Player player, boolean useAlias) {
+    public static ItemStack getMaterial(String itemString, boolean allowHand, Player player, boolean useAlias) {
         Material material;
         String materialString = itemString.split(":")[0];
         Short dataValue = null;
@@ -152,7 +156,7 @@ public class DkabotShop extends JavaPlugin {
         }
         if (useAlias) {
             //Aliases, always first
-            for (String alias : getConfig().getStringList("ItemAlias")) {
+            for (String alias : instance.getConfig().getStringList("ItemAlias")) {
                 if (!materialString.equalsIgnoreCase(alias.split(",")[0])) {
                     continue;
                 }
@@ -164,7 +168,7 @@ public class DkabotShop extends JavaPlugin {
                 else {
                     material = Material.getMaterial(actualMaterial.toUpperCase());
                     if (material == null) {
-                        ItemStack stack = itemDB.get(actualMaterial);
+                        ItemStack stack = instance.getItemDB().get(actualMaterial);
                         if (stack == null) {
                             return stack;
                         }
@@ -198,7 +202,7 @@ public class DkabotShop extends JavaPlugin {
         } //if it's not, more effort.
         else {
             //try as an items.csv name
-            ItemStack stack = itemDB.get(materialString);
+            ItemStack stack = instance.getItemDB().get(materialString);
             if (stack != null) {
                 material = stack.getType();
                 if (dataValue == null) {
@@ -222,7 +226,7 @@ public class DkabotShop extends JavaPlugin {
         return new ItemStack(material, 1, dataValue);
     }
 
-    Double getMoney(String s) {
+    public static Double getMoney(String s) {
         try {
             Double d = Double.parseDouble(s);
             DecimalFormat twoDForm = new DecimalFormat("#.00");
@@ -232,7 +236,7 @@ public class DkabotShop extends JavaPlugin {
         }
     }
 
-    Double getMoneyPlayer(String s, Player player) {
+    public static Double getMoneyPlayer(String s, Player player) {
         Double price = getMoney(s);
         if (price == null) {
             player.sendMessage(ChatColor.RED + "Invalid cost amount!");
@@ -243,14 +247,14 @@ public class DkabotShop extends JavaPlugin {
             return null;
         }
         if (!player.hasPermission("dkabotshopadmin.bypassMaxPrice")) {
-            Double maxPrice = getConfig().getDouble("MaxPrice");
+            Double maxPrice = instance.getConfig().getDouble("MaxPrice");
             if (maxPrice != -1 && price > maxPrice) {
                 player.sendMessage(ChatColor.RED + "The cost cannot be above " + maxPrice.toString() + "!");
                 return null;
             }
         }
         if (!player.hasPermission("dkabotshopadmin.bypassMinPrice")) {
-            Double minPrice = getConfig().getDouble("MinPrice");
+            Double minPrice = instance.getConfig().getDouble("MinPrice");
             if (minPrice != -1 && price < minPrice) {
                 player.sendMessage(ChatColor.RED + "The cost cannot be below " + minPrice.toString() + "!");
                 return null;
@@ -322,7 +326,7 @@ public class DkabotShop extends JavaPlugin {
                 errors.add(getConfig().getInt("MaxStock") + ",Max Stock");
             }
         } catch (Exception e) {
-            log.severe("[DkabotShop] Exception occurred while processing the configuration! Printing stacktrace and disabling...");
+            log.severe("Exception occurred while processing the configuration! Printing stacktrace and disabling...");
             e.printStackTrace();
             errors = null;
         }
@@ -343,8 +347,8 @@ public class DkabotShop extends JavaPlugin {
     }
 
     //checks if an item is on a blacklist. Boolean for now, but will become something else once a datavalue item blacklist is added
-    boolean illegalItem(ItemStack material) {
-        for (String materialString : getConfig().getStringList("Blacklist.Always")) {
+    public static boolean illegalItem(ItemStack material) {
+        for (String materialString : instance.getConfig().getStringList("Blacklist.Always")) {
             ItemStack blackMaterial = getMaterial(materialString, false, null, false);
             if (blackMaterial.getTypeId() == material.getTypeId() && blackMaterial.getDurability() == material.getDurability()) {
                 return true;
@@ -354,7 +358,7 @@ public class DkabotShop extends JavaPlugin {
     }
 
     //function to give items, split into itemstacks based on item.getMaxStackSize()
-    Integer giveItem(ItemStack item, Player player) {
+    public static Integer giveItem(ItemStack item, Player player) {
         Integer fullItemStacks = item.getAmount() / item.getMaxStackSize();
         Integer fullItemStacksRemaining = fullItemStacks;
         Integer nonFullItemStack = item.getAmount() % item.getMaxStackSize();
@@ -387,28 +391,29 @@ public class DkabotShop extends JavaPlugin {
     }
 
     //broadcasts messages
-    void broadcastMessage(String message) {
+    public static void broadcastMessage(String message) {
+        FileConfiguration c = instance.getConfig();
         //In case broadcasting is disabled, just exit now
-        if (getConfig().getBoolean("DisableBroadcasting")) {
+        if (c.getBoolean("DisableBroadcasting")) {
             return;
         }
         //In case alternate broadcasting is enabled, send the message to every player
-        if (getConfig().getBoolean("AlternateBroadcasting")) {
-            for (Player player : getServer().getOnlinePlayers()) {
+        if (c.getBoolean("AlternateBroadcasting")) {
+            for (Player player : Bukkit.getServer().getOnlinePlayers()) {
                 player.sendMessage(message);
             }
         } //In case alternate broadcasting is disabled (default), make the server send the message
         else {
-            getServer().broadcastMessage(message);
+            Bukkit.getServer().broadcastMessage(message);
         }
     }
 
     //formats messages for broadcast
-    String formatMessage(String messagePointer, String player, String item, Integer amount, Double cost, String currencyName) {
+    public static String formatMessage(String messagePointer, String player, String item, Integer amount, Double cost, String currencyName) {
         if (messagePointer == null) {
             return "Failure to Generate Message";
         }
-        String message = getConfig().getString("Messages." + messagePointer, null);
+        String message = instance.getConfig().getString("Messages." + messagePointer, null);
         if (message == null) {
             return "Failure to Generate Message";
         }
@@ -481,5 +486,17 @@ public class DkabotShop extends JavaPlugin {
         }
         
         return true;
+    }
+
+    public ItemDb getItemDB() {
+        return itemDB;
+    }
+
+    public static DkabotShop getInstance() {
+        return instance;
+    }
+
+    public Economy getEconomy() {
+        return economy;
     }
 }

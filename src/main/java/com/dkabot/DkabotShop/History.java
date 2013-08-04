@@ -73,7 +73,7 @@ public class History implements CommandExecutor {
                 if (page > 0) {
                     message = "Page " + (page + 1) + " contains no results. Try page 1";
                 } else if (material != null) {
-                    message = "Nobody has sold any " + plugin.itemDB.rget(material.getTypeId(), material.getDurability()).toUpperCase() + " yet.";
+                    message = "Nobody has sold any " + plugin.getItemDB().rget(material.getTypeId(), material.getDurability()).toUpperCase() + " yet.";
                 } else {
                     message = "Nobody has sold anything yet.";
                 }
@@ -88,7 +88,7 @@ public class History implements CommandExecutor {
             }
             //send that confirmation message of what's being looked for!
             if (material != null) {
-                sender.sendMessage(ChatColor.GREEN + "Items Sold, " + plugin.itemDB.rget(material.getTypeId(), material.getDurability()).toUpperCase() + " Only:");
+                sender.sendMessage(ChatColor.GREEN + "Items Sold, " + plugin.getItemDB().rget(material.getTypeId(), material.getDurability()).toUpperCase() + " Only:");
             } else {
                 sender.sendMessage(ChatColor.GREEN + "Items Sold, No Filer:");
             }
@@ -98,11 +98,11 @@ public class History implements CommandExecutor {
                 DB_History DB = DBClass.get(i);
                 String currencyName = "Error Getting Currency";
                 if (DB.getCost() == 1) {
-                    currencyName = plugin.economy.currencyNameSingular();
+                    currencyName = plugin.getEconomy().currencyNameSingular();
                 } else {
-                    currencyName = plugin.economy.currencyNamePlural();
+                    currencyName = plugin.getEconomy().currencyNamePlural();
                 }
-                sender.sendMessage(ChatColor.GOLD + DB.getBuyer() + ChatColor.BLUE + " bought " + ChatColor.GOLD + DB.getAmount() + " " + plugin.itemDB.rget(DB.getItem()).toUpperCase() + ChatColor.BLUE + " for about " + ChatColor.GOLD + DB.getCost() + " " + currencyName + ChatColor.BLUE + " each.");
+                sender.sendMessage(ChatColor.GOLD + DB.getBuyer() + ChatColor.BLUE + " bought " + ChatColor.GOLD + DB.getAmount() + " " + plugin.getItemDB().rget(DB.getItem()).toUpperCase() + ChatColor.BLUE + " for about " + ChatColor.GOLD + DB.getCost() + " " + currencyName + ChatColor.BLUE + " each.");
                 i++;
             }
             if (DBPageList.getPage(page).hasNext()) {

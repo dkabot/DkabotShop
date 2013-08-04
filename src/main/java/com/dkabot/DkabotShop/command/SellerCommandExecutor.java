@@ -1,5 +1,7 @@
-package com.dkabot.DkabotShop;
+package com.dkabot.DkabotShop.command;
 
+import com.dkabot.DkabotShop.DB_ForSale;
+import com.dkabot.DkabotShop.DkabotShop;
 import java.util.HashMap;
 
 import org.bukkit.ChatColor;
@@ -9,11 +11,11 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-public class Sellers implements CommandExecutor {
+public class SellerCommandExecutor implements CommandExecutor {
 
     private DkabotShop plugin;
 
-    public Sellers(DkabotShop plugin) {
+    public SellerCommandExecutor(DkabotShop plugin) {
         this.plugin = plugin;
     }
 
@@ -137,9 +139,9 @@ public class Sellers implements CommandExecutor {
             //Setting currency name, gotta get plurals right
             if (cost != null) {
                 if (cost == 1) {
-                    currencyName = plugin.economy.currencyNameSingular();
+                    currencyName = plugin.getEconomy().currencyNameSingular();
                 } else {
-                    currencyName = plugin.economy.currencyNamePlural();
+                    currencyName = plugin.getEconomy().currencyNamePlural();
                 }
             }
             //Remove the item from the player's inventory
@@ -178,18 +180,18 @@ public class Sellers implements CommandExecutor {
                 DBClass.setAmount(amount);
                 DBClass.setCost(cost);
                 plugin.getDatabase().save(DBClass);
-                plugin.broadcastMessage(plugin.formatMessage("NewlySelling", sender.getName(), plugin.itemDB.rget(material.getTypeId(), material.getDurability()).toUpperCase(), amount, cost, currencyName));
+                plugin.broadcastMessage(plugin.formatMessage("NewlySelling", sender.getName(), plugin.getItemDB().rget(material.getTypeId(), material.getDurability()).toUpperCase(), amount, cost, currencyName));
             } //Item is in shop, modify the entry
             else {
                 //Set amount in the DB
                 DBClass.setAmount(DBClass.getAmount() + amount);
                 //Cost not changed, just broadcast
                 if (cost == null) {
-                    plugin.broadcastMessage(plugin.formatMessage("Added", sender.getName(), plugin.itemDB.rget(material.getTypeId(), material.getDurability()).toUpperCase(), amount, null, null));
+                    plugin.broadcastMessage(plugin.formatMessage("Added", sender.getName(), plugin.getItemDB().rget(material.getTypeId(), material.getDurability()).toUpperCase(), amount, null, null));
                 } else {
                     //Cost changed, set cost and broadcast varied message.
                     DBClass.setCost(cost);
-                    plugin.broadcastMessage(plugin.formatMessage("AddedPriceChange", sender.getName(), plugin.itemDB.rget(material.getTypeId(), material.getDurability()).toUpperCase(), amount, cost, currencyName));
+                    plugin.broadcastMessage(plugin.formatMessage("AddedPriceChange", sender.getName(), plugin.getItemDB().rget(material.getTypeId(), material.getDurability()).toUpperCase(), amount, cost, currencyName));
                 }
                 //Save new info to the DB
                 plugin.getDatabase().save(DBClass);
@@ -294,18 +296,18 @@ public class Sellers implements CommandExecutor {
                 //Inform the player of their lack of space
                 sender.sendMessage(ChatColor.GREEN + "You can only hold " + amountReturned + " of this, so you got that much back.");
                 //Tell the whole server what just happened
-                plugin.broadcastMessage(plugin.formatMessage("RemovedSome", sender.getName(), plugin.itemDB.rget(material.getTypeId(), material.getDurability()).toUpperCase(), amountNotReturned, null, null));
+                plugin.broadcastMessage(plugin.formatMessage("RemovedSome", sender.getName(), plugin.getItemDB().rget(material.getTypeId(), material.getDurability()).toUpperCase(), amountNotReturned, null, null));
 
             } else {
                 if (args.length == 2 && amountNotReturned != 0) {
                     //Again, in case of /cancel item amount. Saves amount in DB and tells the server what happened.
                     DBClass.setAmount(amountNotReturned);
                     plugin.getDatabase().save(DBClass);
-                    plugin.broadcastMessage(plugin.formatMessage("RemovedSome", sender.getName(), plugin.itemDB.rget(material.getTypeId(), material.getDurability()).toUpperCase(), amountNotReturned, null, null));
+                    plugin.broadcastMessage(plugin.formatMessage("RemovedSome", sender.getName(), plugin.getItemDB().rget(material.getTypeId(), material.getDurability()).toUpperCase(), amountNotReturned, null, null));
                 } else {
                     //In case the supply was emptied, tell the whole server and delete the DB entry.
                     //If /cancel item amount depletes the supply, this is called instead.
-                    plugin.broadcastMessage(plugin.formatMessage("RemovedAll", sender.getName(), plugin.itemDB.rget(material.getTypeId(), material.getDurability()).toUpperCase(), null, null, null));
+                    plugin.broadcastMessage(plugin.formatMessage("RemovedAll", sender.getName(), plugin.getItemDB().rget(material.getTypeId(), material.getDurability()).toUpperCase(), null, null, null));
                     plugin.getDatabase().delete(DBClass);
                 }
             }
@@ -367,12 +369,12 @@ public class Sellers implements CommandExecutor {
             plugin.getDatabase().save(DBClass);
             //Set currencyName
             if (cost == 1) {
-                currencyName = plugin.economy.currencyNameSingular();
+                currencyName = plugin.getEconomy().currencyNameSingular();
             } else {
-                currencyName = plugin.economy.currencyNamePlural();
+                currencyName = plugin.getEconomy().currencyNamePlural();
             }
             //Tell the whole server what just happened
-            plugin.broadcastMessage(plugin.formatMessage("PriceChange", sender.getName(), plugin.itemDB.rget(material.getTypeId(), material.getDurability()).toUpperCase(), null, cost, currencyName));
+            plugin.broadcastMessage(plugin.formatMessage("PriceChange", sender.getName(), plugin.getItemDB().rget(material.getTypeId(), material.getDurability()).toUpperCase(), null, cost, currencyName));
             //If you reach here, success!
             return true;
         }
