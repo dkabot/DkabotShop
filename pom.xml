@@ -27,6 +27,12 @@
       <scope>provided</scope>                                                                                                                                                                
       <version>1.2.25</version>                                                                                                                                                              
     </dependency>    
+    <dependency>                                                                                                                                                                             
+      <groupId>org.mcstats.bukkit</groupId>                                                                                                                                                  
+      <artifactId>metrics</artifactId>                                                                                                                                                       
+      <version>R6</version>                                                                                                                                                                  
+      <scope>compile</scope>                                                                                                                                                                 
+    </dependency>  
   </dependencies>
   
   <repositories>
@@ -34,11 +40,16 @@
       <id>bukkit-repo</id>
       <url>http://repo.bukkit.org/content/groups/public/</url>
     </repository>
+    <repository>                                                                                                                                                                             
+      <id>Plugin Metrics</id>                                                                                                                                                                
+      <url>http://repo.mcstats.org/content/repositories/public</url>                                                                                                                         
+    </repository>   
     <repository>
       <id>ever-repo-local</id>
       <url>http://192.168.1.65/~joshua/maven/</url>
     </repository>
   </repositories>
+  
   <build>
     <extensions>
       <extension>
@@ -46,6 +57,7 @@
         <artifactId>wagon-ssh</artifactId>
       </extension>
     </extensions> 
+    
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -54,6 +66,22 @@
           <source>1.7</source>
           <target>1.7</target>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>2.1</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <minimizeJar>true</minimizeJar>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
