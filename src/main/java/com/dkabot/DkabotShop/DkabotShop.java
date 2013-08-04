@@ -7,26 +7,16 @@ import com.dkabot.DkabotShop.persistence.HistoryEntity;
 import com.dkabot.DkabotShop.command.HistoryCommandExecutor;
 import com.dkabot.DkabotShop.command.SellerCommandExecutor;
 import com.dkabot.DkabotShop.command.BuyerCommandExecutor;
+import com.dkabot.DkabotShop.util.DkabotUtils;
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.persistence.PersistenceException;
 
 import net.milkbowl.vault.Vault;
 import net.milkbowl.vault.economy.Economy;
-import org.bukkit.Bukkit;
-
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -95,23 +85,8 @@ public class DkabotShop extends JavaPlugin {
         log.info(getDescription().getName() + " is now disabled.");
     }
 
-    public static boolean isInt(String s) {
-        try {
-            Integer.parseInt(s);
-            return true;
-        } catch (NumberFormatException nfe) {
-            return false;
-        }
-    }
 
-    public static boolean isDouble(String s) {
-        try {
-            Double.parseDouble(s);
-            return true;
-        } catch (NumberFormatException nfe) {
-            return false;
-        }
-    }
+    
 
     public void setupDatabase() {
         try {
@@ -131,10 +106,6 @@ public class DkabotShop extends JavaPlugin {
         return list;
     }
 
-    public static boolean isDecimal(double v) {
-        return (Math.floor(v) != v);
-        //If true, decimal, else whole number.
-    }
 
     private Boolean setupEconomy() {
         RegisteredServiceProvider<Economy> economyProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class);
@@ -144,129 +115,7 @@ public class DkabotShop extends JavaPlugin {
         return (economy != null);
     }
 
-    public static ItemStack getMaterial(String itemString, boolean allowHand, Player player) {
-        return getMaterial(itemString, allowHand, player, true);
-    }
 
-    public static ItemStack getMaterial(String itemString, boolean allowHand, Player player, boolean useAlias) {
-        Material material;
-        String materialString = itemString.split(":")[0];
-        Short dataValue = null;
-        if (itemString.split(":").length > 1) {
-            try {
-                dataValue = Short.parseShort(itemString.split(":")[1]);
-            } catch (NumberFormatException nfe) {
-                dataValue = 0;
-            }
-        }
-        if (useAlias) {
-            //Aliases, always first
-            for (String alias : instance.getConfig().getStringList("ItemAlias")) {
-                if (!materialString.equalsIgnoreCase(alias.split(",")[0])) {
-                    continue;
-                }
-                String actualMaterial = alias.split(",")[1];
-                //In case of an item ID
-                if (isInt(actualMaterial)) {
-                    material = Material.getMaterial(Integer.parseInt(actualMaterial));
-                } //Must be a material name
-                else {
-                    material = Material.getMaterial(actualMaterial.toUpperCase());
-                    if (material == null) {
-                        ItemStack stack = instance.getItemDB().get(actualMaterial);
-                        if (stack == null) {
-                            return stack;
-                        }
-                        material = stack.getType();
-                        if (dataValue == null) {
-                            dataValue = stack.getDurability();
-                        }
-                    }
-                }
-                //Should be an actual material
-                if (dataValue == null) {
-                    dataValue = 0;
-                }
-                if (material == Material.AIR) {
-                    return null;
-                }
-                return new ItemStack(material, 1, dataValue);
-            }
-        }
-        //"hand" as an item, can be overridden by an alias
-        if (materialString.equalsIgnoreCase("hand")) {
-            if (allowHand) {
-                material = player.getItemInHand().getType();
-                dataValue = player.getItemInHand().getDurability();
-            } else {
-                return null; //if hand is not allowed and it's not an alias, not bothering
-            }
-        } //if it's an item ID, that's all we need
-        else if (isInt(materialString)) {
-            material = Material.getMaterial(Integer.parseInt(materialString));
-        } //if it's not, more effort.
-        else {
-            //try as an items.csv name
-            ItemStack stack = instance.getItemDB().get(materialString);
-            if (stack != null) {
-                material = stack.getType();
-                if (dataValue == null) {
-                    dataValue = stack.getDurability();
-                }
-            } //items.csv didn't work... try material name?
-            else {
-                material = Material.getMaterial(materialString.toUpperCase());
-                if (material == null) {
-                    return null;
-                }
-            }
-        }
-        if (dataValue == null) {
-            dataValue = 0;
-        }
-        if (material == Material.AIR) {
-            return null;
-        }
-        //could return null or not
-        return new ItemStack(material, 1, dataValue);
-    }
-
-    public static Double getMoney(String s) {
-        try {
-            Double d = Double.parseDouble(s);
-            DecimalFormat twoDForm = new DecimalFormat("#.00");
-            return Double.parseDouble(twoDForm.format(d));
-        } catch (NumberFormatException e) {
-            return null;
-        }
-    }
-
-    public static Double getMoneyPlayer(String s, Player player) {
-        Double price = getMoney(s);
-        if (price == null) {
-            player.sendMessage(ChatColor.RED + "Invalid cost amount!");
-            return null;
-        }
-        if (price <= 0) {
-            player.sendMessage(ChatColor.RED + "The cost cannot be 0 or negative!");
-            return null;
-        }
-        if (!player.hasPermission("dkabotshopadmin.bypassMaxPrice")) {
-            Double maxPrice = instance.getConfig().getDouble("MaxPrice");
-            if (maxPrice != -1 && price > maxPrice) {
-                player.sendMessage(ChatColor.RED + "The cost cannot be above " + maxPrice.toString() + "!");
-                return null;
-            }
-        }
-        if (!player.hasPermission("dkabotshopadmin.bypassMinPrice")) {
-            Double minPrice = instance.getConfig().getDouble("MinPrice");
-            if (minPrice != -1 && price < minPrice) {
-                player.sendMessage(ChatColor.RED + "The cost cannot be below " + minPrice.toString() + "!");
-                return null;
-            }
-        }
-        return price;
-    }
 
     /**
      * Ensures the configuration is not missing any needed fields.
@@ -312,12 +161,12 @@ public class DkabotShop extends JavaPlugin {
                     continue;
                 }
                 String materialString = str.split(",")[1];
-                if (!materialString.equalsIgnoreCase("hand") && getMaterial(materialString, false, null, false) == null) {
+                if (!materialString.equalsIgnoreCase("hand") && DkabotUtils.getMaterial(materialString, false, null, false) == null) {
                     errors.add(materialString + ",ItemAlias");
                 }
             }
             for (String materialString : getConfig().getStringList("Blacklist.Always")) {
-                if (getMaterial(materialString, false, null, false) == null) {
+                if (DkabotUtils.getMaterial(materialString, false, null, false) == null) {
                     errors.add(materialString + ",Blacklist Always");
                 }
             }

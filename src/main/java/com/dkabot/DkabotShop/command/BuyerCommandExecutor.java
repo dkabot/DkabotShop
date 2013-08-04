@@ -69,7 +69,7 @@ public class BuyerCommandExecutor implements CommandExecutor {
             String currencyName = "Error Getting Currency";
             String messageType = null;
             //Item validation
-            material = plugin.getMaterial(args[0], true, player);
+            material = DkabotUtils.getMaterial(args[0], true, player);
             if (material == null) {
                 sender.sendMessage(ChatColor.RED + "Invalid item!");
                 return true;
@@ -80,7 +80,7 @@ public class BuyerCommandExecutor implements CommandExecutor {
                 return true;
             }
             //Amount setting and validation
-            if (!plugin.isInt(args[1])) {
+            if (!DkabotUtils.isInt(args[1])) {
                 sender.sendMessage(ChatColor.RED + "Amount to buy must be a number.");
                 return true;
             }
@@ -94,7 +94,7 @@ public class BuyerCommandExecutor implements CommandExecutor {
             }
             //Set max cost if specified
             if (args.length == 3) {
-                maxPrice = plugin.getMoney(args[2]);
+                maxPrice = DkabotUtils.getMoney(args[2]);
                 //Validate max cost
                 if (maxPrice == null) {
                     sender.sendMessage(ChatColor.RED + "Invalid maximum purchase price!");
@@ -261,10 +261,10 @@ public class BuyerCommandExecutor implements CommandExecutor {
             Query<SaleEntity> query = plugin.getDatabase().find(SaleEntity.class).orderBy().asc("cost");
             ExpressionList<?> eList = query.where();
             for (String arg : args) {
-                if ((arg.contains("p") || arg.contains("P")) && plugin.isInt(arg.replaceFirst("(?i)p", ""))) {
+                if ((arg.contains("p") || arg.contains("P")) && DkabotUtils.isInt(arg.replaceFirst("(?i)p", ""))) {
                     page = Integer.parseInt(arg.replaceFirst("(?i)p", "")) - 1;
-                } else if (plugin.getMaterial(arg, true, player) != null) {
-                    material = plugin.getMaterial(arg, true, player);
+                } else if (DkabotUtils.getMaterial(arg, true, player) != null) {
+                    material = DkabotUtils.getMaterial(arg, true, player);
                 } else {
                     seller = arg;
                 }

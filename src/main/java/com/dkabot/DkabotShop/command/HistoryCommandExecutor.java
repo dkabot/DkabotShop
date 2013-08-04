@@ -50,10 +50,10 @@ public class HistoryCommandExecutor implements CommandExecutor {
             Query<HistoryEntity> query = plugin.getDatabase().find(HistoryEntity.class).orderBy().desc("id");
             ExpressionList<?> eList = query.where();
             for (String arg : args) {
-                if ((arg.contains("p") || arg.contains("P")) && plugin.isInt(arg.replaceFirst("(?i)p", ""))) {
+                if ((arg.contains("p") || arg.contains("P")) && DkabotUtils.isInt(arg.replaceFirst("(?i)p", ""))) {
                     page = Integer.parseInt(arg.replaceFirst("(?i)p", "")) - 1;
-                } else if (plugin.getMaterial(arg, true, player) != null) {
-                    material = plugin.getMaterial(arg, true, player);
+                } else if (DkabotUtils.getMaterial(arg, true, player) != null) {
+                    material = DkabotUtils.getMaterial(arg, true, player);
                 }
             }
             if (page < 0) {

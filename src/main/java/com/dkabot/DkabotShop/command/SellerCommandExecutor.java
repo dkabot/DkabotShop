@@ -57,12 +57,12 @@ public class SellerCommandExecutor implements CommandExecutor {
                 sender.sendMessage(ChatColor.RED + "Too many arguments.");
                 return true;
             }
-            if (!args[1].equalsIgnoreCase("all") && !plugin.isInt(args[1])) {
+            if (!args[1].equalsIgnoreCase("all") && !DkabotUtils.isInt(args[1])) {
                 sender.sendMessage(ChatColor.RED + "Amount to sell must be a number.");
                 return true;
             }
             //Get and parse input for validity
-            material = plugin.getMaterial(args[0], true, player);
+            material = DkabotUtils.getMaterial(args[0], true, player);
             if (material == null) {
                 sender.sendMessage(ChatColor.RED + "Invalid Item!");
                 return true;
@@ -108,7 +108,7 @@ public class SellerCommandExecutor implements CommandExecutor {
             }
             //Manually set cost if the user chooses to do so
             if (args.length == 3) {
-                cost = plugin.getMoneyPlayer(args[2], (Player) sender);
+                cost = DkabotUtils.getMoneyPlayer(args[2], (Player) sender);
                 //Check validity of price
                 if (cost == null) {
                     return true;
@@ -226,7 +226,7 @@ public class SellerCommandExecutor implements CommandExecutor {
             HashMap<Integer, ItemStack> materialNotReturned;
             Integer amountNotReturned = 0;
             //Get and check validity of input
-            material = plugin.getMaterial(args[0], true, player);
+            material = DkabotUtils.getMaterial(args[0], true, player);
             if (material == null) {
                 sender.sendMessage(ChatColor.RED + "Invalid Item!");
                 return true;
@@ -249,7 +249,7 @@ public class SellerCommandExecutor implements CommandExecutor {
             if (args.length == 2 && !args[1].equalsIgnoreCase("all")) {
                 //Set the amount to return, check if it's a valid Integer
                 Integer amountToReturn;
-                if (!plugin.isInt(args[1])) {
+                if (!DkabotUtils.isInt(args[1])) {
                     sender.sendMessage(ChatColor.RED + "Amount to return must be a number.");
                     return true;
                 } else {
@@ -333,8 +333,8 @@ public class SellerCommandExecutor implements CommandExecutor {
                 return true;
             }
             //Declare and initialize variables
-            ItemStack material = plugin.getMaterial(args[0], true, (Player) sender);
-            Double cost = plugin.getMoneyPlayer(args[1], (Player) sender);
+            ItemStack material = DkabotUtils.getMaterial(args[0], true, (Player) sender);
+            Double cost = DkabotUtils.getMoneyPlayer(args[1], (Player) sender);
             Integer itemID;
             Short durability;
             //Check for an invalid price

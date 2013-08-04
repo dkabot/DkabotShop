@@ -40,14 +40,14 @@ public class ManagedFile {
                 if (line1 != null) {
                     itemVersionString = line1.split("#version: ")[1].trim();
                 }
-                if (itemVersionString != null && plugin.isDouble(itemVersionString)) {
+                if (itemVersionString != null && DkabotUtils.isDouble(itemVersionString)) {
                     itemVersion = Double.parseDouble(itemVersionString);
                 }
                 if (itemVersion != null && itemVersion == -1) {
                     fileOK = true;
                     log.info("[DkabotShop] items.csv version set to -1, version check SKIPPED");
                 } else {
-                    if (itemVersion != null && plugin.isDouble(pluginVersionString)) {
+                    if (itemVersion != null && DkabotUtils.isDouble(pluginVersionString)) {
                         pluginVersion = Double.parseDouble(pluginVersionString);
                     }
                     if (pluginVersion != null) {
