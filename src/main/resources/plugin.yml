@@ -1,0 +1,81 @@
+name: DkabotShop
+main: com.dkabot.DkabotShop.DkabotShop
+version: 1.8
+author: dkabot
+depend: [Vault]
+database: true
+website: http://dkabot.com/
+description: Dkabot's recreation of VirtualShop.
+commands:
+  sell:
+    description: Put an item in your inventory on the market for purchase.
+    usage: /<command> <item> <amount> [price] - Puts <amount> of <item> on the market for [price]. If no price is provided, it will use the last provided one if possible.
+  cancel:
+    description: Removes an item you are selling from the market and gives you the unsold amounts back.
+    usage: /<command> <item> [amount] - Takes [[amount] of] <item> off the market.
+  price:
+    description: Sets the price on an item you are selling
+    usage: /<command> <item> <price> - Sets price of <item> in your shop to <price>.
+  buy:
+    description: Buy an amount of an item off the market.
+    usage: /<command> <item> <amount> [max price] - Attempt to buy <amount> of <item> [only if the amount per price is less than [max price]]
+  stock:
+    description: Look at current items for sale, with stock/prices.
+    usage: /<command> [player] [item] [page] - Look at [page number [page] of] [[player]'s] items [or [item]] for sale.
+    aliases: [find]
+  sales:
+    description: Get a history of items sold.
+    usage: /<command> [item] [page] - Get [page number [page] of] sales history [of [item]].
+  shopinfo:
+    description: Shows information about the plugin and usage.
+    usage: /<command> [topic] - Look at info for [topic]
+    aliases: [shop]
+
+permissions:
+  dkabotshop.*:
+    description: Gives access to all DkabotShop commands
+    children:
+      dkabotshop.buy: true
+      dkabotshop.stock: true
+      dkabotshop.sell: true
+      dkabotshop.cancel: true
+      dkabotshop.price: true
+      dkabotshop.sales: true
+      dkabotshop.shopinfo: true
+  dkabotshopadmin.*:
+    description: Gives access to all DkabotShop admin features
+    children:
+      dkabotshopadmin.bypassMaxPrice: true
+      dkabotshopadmin.bypassMinPrice: true
+      dkabotshopadmin.bypassMaxStock: true
+    default: op
+  dkabotshopadmin.bypassMaxPrice:
+    description: Allows bypass of maximum sell price
+    default: op
+  dkabotshopadmin.bypassMinPrice:
+    description: Allows bypass of minimum sell price
+    default: op
+  dkabotshopadmin.bypassMaxStock:
+    description: Allows bypass of maximum shop stock
+    default: op
+  dkabotshop.buy:
+    description: Allows access to /buy
+    default: true
+  dkabotshop.stock:
+    description: Allows access to /stock
+    default: true
+  dkabotshop.sell:
+    description: Allows access to /sell
+    default: true
+  dkabotshop.cancel:
+    description: Allows access to /cancel
+    default: true
+  dkabotshop.price:
+    description: Allows access to /price
+    default: true
+  dkabotshop.sales:
+    description: Allows access to /sales
+    default: true
+  dkabotshop.shopinfo:
+    description: Allows access to /shopinfo
+    default: true
